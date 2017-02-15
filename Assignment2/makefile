@@ -4,7 +4,7 @@ MAT_SIZE=4
 
 all: mat_mul read create
 
-mat_mul: mat_mul.o
+mat_mul: mat_mul.o g_matrix_mult.o
 	$(CC) $+ -o $@
 
 read: read_file.o
@@ -13,13 +13,16 @@ read: read_file.o
 create: create_file.o
 	$(CC) $+ -o $@
 
-mat_mul.o: mat_mul.c
+mat_mul.o: mat_mul.cu
 	$(CC) $(CFLAGS) $<
 
 read_file.o: read_file.c
 	$(CC) $(CFLAGS) $<
 
 create_file.o: create_file.c
+	$(CC) $(CFLAGS) $<
+
+g_matrix_mult.o: g_matrix_mult.cu g_matrix_mult.h
 	$(CC) $(CFLAGS) $<
 
 mat1.bin: create

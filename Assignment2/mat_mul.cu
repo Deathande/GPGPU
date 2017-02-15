@@ -29,7 +29,8 @@ int main (int argc, char** argv)
   double* m2 = get_matrix_from_file (argv[3], size);
   if (m2 == NULL)
     fatal_error (create_error_string ("cannot get matrix from file %s", argv[3]));
-  double* result = multiply (m1, m2, size);
+  //double* result = multiply (m1, m2, size);
+  double* result = global_matrix_mult(m1, m2, size);
   write_product_to_file (argv[4], result, size);
   free (result);
   free (m2);
@@ -45,7 +46,7 @@ void fatal_error (const char* message)
 
 char* create_error_string (const char* message, const char* data_string)
 {
-  char* result = malloc (60 * sizeof(char));
+  char* result = (char*)malloc (60 * sizeof(char));
   if (result == NULL)
     fatal_error ("malloc error");
   snprintf (result, 60, message, data_string);
@@ -57,7 +58,7 @@ double* get_matrix_from_file (const char* file_name, int size)
   int fd = open (file_name, O_RDONLY);
   if (fd < 0)
     fatal_error (create_error_string ("could not open %s", file_name));
-  double* m = malloc (size * size * sizeof (double));
+  double* m = (double*)malloc (size * size * sizeof (double));
   if (m == 0)
     fatal_error ("malloc error");
   size_t read_size = read(fd, m, size * size * sizeof(double));
@@ -71,7 +72,7 @@ double* multiply (double* m1, double* m2, int size)
 {
   double* result;
   double dot;
-  result = malloc(size * size * sizeof(double));
+  result = (double*)malloc(size * size * sizeof(double));
   for (int i = 0; i < size; i++)
   {
     for (int j = 0; j < size; j++)
