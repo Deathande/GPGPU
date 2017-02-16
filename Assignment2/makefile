@@ -1,6 +1,6 @@
 CC=nvcc
 CFLAGS=-g -c
-MAT_SIZE=4
+MAT_SIZE=200
 
 all: mat_mul read create
 
