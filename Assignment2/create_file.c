@@ -42,6 +42,6 @@ double* create_matrix (int size)
     fatal_error ("malloc error");
   srand (time(NULL));
   for (int i = 0; i < size * size; ++i)
-    m[i] = rand();
+    m[i] = (float)rand() / RAND_MAX;
   return m;
 }

@@ -30,25 +30,13 @@ int main (int argc, char** argv)
   double* m2 = get_matrix_from_file (argv[3], size);
   if (m2 == NULL)
     fatal_error (create_error_string ("cannot get matrix from file %s", argv[3]));
-  time_t t1 = clock();
   double* result = multiply (m1, m2, size);
-  write_product_to_file (argv[4], result, size);
-  time_t t2 = clock();
-  printf("serial multiply: %f\n", (float)(t2 - t1) / CLOCKS_PER_SEC);
-
-  t1 = clock();
   double* result2 = global_matrix_mult(m1, m2, size);
-  t2 = clock();
-  printf("global GPU: %f\n", (float)(t2 - t1) / CLOCKS_PER_SEC);
-
-  t1 = clock();
   double* result3 = shared_matrix_mult(m1, m2, size);
-  t2 = clock();
-  printf("shared GPU: %f\n", (float)(t2 - t1) / CLOCKS_PER_SEC);
-
-
+  write_product_to_file (argv[4], result3, size);
   free (result);
   free (result2);
+  free (result3);
   free (m2);
   free (m1);
   return 0;
