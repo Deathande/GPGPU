@@ -16,12 +16,16 @@ __global__ void sg_mat_mult(double* m1,
                             double* m3,
                             unsigned int size)
 {
+  __shared__  double* s_m1;
+  __shared__  double* s_m2;
   int c_i = threadIdx.x;
   int c_j = threadIdx.y;
   double dot = 0;
+  s_m1 = m1;
+  s_m2 = m2;
 
   for (int i = 0; i < size; i++)
-    dot += m1[c_i * size + i] * m2[i * size + c_j];
+    dot += s_m1[c_i * size + i] * s_m2[i * size + c_j];
   m3[c_i * size + c_j] = dot;
 }
 
