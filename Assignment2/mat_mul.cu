@@ -29,10 +29,13 @@ int main (int argc, char** argv)
   double* m2 = get_matrix_from_file (argv[3], size);
   if (m2 == NULL)
     fatal_error (create_error_string ("cannot get matrix from file %s", argv[3]));
-  //double* result = multiply (m1, m2, size);
-  double* result = global_matrix_mult(m1, m2, size);
-  write_product_to_file (argv[4], result, size);
+  double* result = multiply (m1, m2, size);
+  double* result2 = global_matrix_mult(m1, m2, size);
+  double* result3 = shared_matrix_mult(m1, m2, size);
+  write_product_to_file (argv[4], result3, size);
   free (result);
+  free (result2);
+  free (result3);
   free (m2);
   free (m1);
   return 0;
