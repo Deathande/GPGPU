@@ -1,7 +1,8 @@
 #include "g_matrix_mult.h"
 
 
-__global__ void sg_mat_mult(double* m1, double* m2, double* m3, unsigned int size)
+__global__
+void sg_mat_mult(double* m1, double* m2, double* m3, unsigned int size)
 {
   __shared__ double* s_m1;
   __shared__ double* s_m2;
@@ -16,7 +17,8 @@ __global__ void sg_mat_mult(double* m1, double* m2, double* m3, unsigned int siz
   m3[c_i*size + c_j] = dot;
 }
 
-__global__ void g_mat_mult(double* m1, double* m2, double* m3, unsigned int size)
+__global__
+void g_mat_mult(double* m1, double* m2, double* m3, unsigned int size)
 {
   int c_i = threadIdx.x;
   int c_j = threadIdx.y;
@@ -45,7 +47,6 @@ double* shared_matrix_mult(const double* m1,
 
   cudaMemcpy(c_m1, m1, num_bytes, cudaMemcpyHostToDevice);
   cudaMemcpy(c_m2, m2, num_bytes, cudaMemcpyHostToDevice);
-  //dim3 threadsPerBlock(size, size);
 
   sg_mat_mult<<<ceil(size * size / 1024), size*size>>>(c_m1, c_m2, c_m3, size);
   cudaMemcpy(result, c_m3, num_bytes, cudaMemcpyDeviceToHost);
@@ -76,7 +77,6 @@ double* global_matrix_mult(const double* m1,
 
   cudaMemcpy(c_m1, m1, num_bytes, cudaMemcpyHostToDevice);
   cudaMemcpy(c_m2, m2, num_bytes, cudaMemcpyHostToDevice);
-  //dim3 threadsPerBlock(size, size);
 
   g_mat_mult<<<ceil(size * size / 1024), size*size>>>(c_m1, c_m2, c_m3, size);
   cudaMemcpy(result, c_m3, num_bytes, cudaMemcpyDeviceToHost);

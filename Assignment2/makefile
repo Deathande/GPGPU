@@ -1,6 +1,7 @@
+# Compiled on Arch Linux with nvcc version 8.0.44
 CC=nvcc
 CFLAGS=-g -c
-MAT_SIZE=10
+MAT_SIZE=100
 
 all: mat_mul read create
 
@@ -35,7 +36,6 @@ data: mat1.bin mat2.bin
 
 run: mat_mul read mat1.bin mat2.bin
 	./mat_mul $(MAT_SIZE) mat1.bin mat2.bin result.bin
-	./read result.bin $(MAT_SIZE)
 
 clean:
 	rm -f *.o create mat_mul read *.bin

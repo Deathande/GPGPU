@@ -1,3 +1,11 @@
+// Borrowed and slightly modified your file IO code from your website.
+// g_matrix_mult.h and g_matrix_mult.cu have my matrix multiplication
+// kernels. 
+//
+// Compiled and run on Arch Linux with nvcc version 8.0.44. It does not 
+// run on the GPU cluster because the cluster's nvcc version does
+// not allow c99 conventions.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -30,10 +38,32 @@ int main (int argc, char** argv)
   double* m2 = get_matrix_from_file (argv[3], size);
   if (m2 == NULL)
     fatal_error (create_error_string ("cannot get matrix from file %s", argv[3]));
+
+  time_t t1, t2;
+
+  // Serial matrix multiplication
+  t1 = clock();
   double* result = multiply (m1, m2, size);
+  t2 = clock();
+  printf("serial time: %f\n", (float)(t2 - t1) / CLOCKS_PER_SEC);
+  //
+
+  // device matrix multiplication, global memory
+  t1 = clock();
   double* result2 = global_matrix_mult(m1, m2, size);
+  t2 = clock();
+  printf("global time: %f\n", (float)(t2 - t1) / CLOCKS_PER_SEC);
+  //
+
+  // device matrix multiplication, shared memory
+  t1 = clock();
   double* result3 = shared_matrix_mult(m1, m2, size);
+  t2 = clock();
+  printf("shared time: %f\n", (float)(t2 - t1) / CLOCKS_PER_SEC);
+  //
+
   write_product_to_file (argv[4], result3, size);
+
   free (result);
   free (result2);
   free (result3);
