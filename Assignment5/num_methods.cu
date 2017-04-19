@@ -20,7 +20,9 @@ float g_sum(float* in, unsigned int size)
   cudaMalloc((void**) &c_in, num_bytes);
   cudaMalloc((void**) &c_out, num_bytes);
   cudaMemcpy(c_in, in, num_bytes, cudaMemcpyHostToDevice);
-  g_sum_kernal<<<BLOCK_SIZE, BLOCK_SIZE>>> (c_in, c_out, size);
+  dim3 dimBlock(BLOCK_SIZE, 1, 1);
+  dim3 dimGrid(ceil((float)size / (float) dimBlock.x), 1, 1);
+  g_sum_kernal<<<dimGrid, dimBlock>>> (c_in, c_out, size);
   cudaDeviceSynchronize();
   cudaMemcpy(result, c_out, num_bytes, cudaMemcpyDeviceToHost);
   cudaFree(c_in);
@@ -55,11 +57,14 @@ void g_sum_kernal(float* in, float* out, unsigned int size)
 
     for(int stride = 1; stride < BLOCK_SIZE<<1; stride <<= 1) {
       __syncthreads();
-    if(threadIdx.x % stride == 0)
-      in_s[2*threadIdx.x] += in_s[2*threadIdx.x + stride];
+      if(threadIdx.x % stride == 0)
+      {
+        in_s[2*threadIdx.x] += in_s[2*threadIdx.x + stride];
+	printf("%f\n", in_s[2*threadIdx.x]);
+      }
     }
     if (threadIdx.x == 0)
-      out[blockIdx.x] = in_s[0];
+      out[0] = in_s[0];
 }
 
 __global__
