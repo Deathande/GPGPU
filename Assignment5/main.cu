@@ -17,4 +17,20 @@ int main(int argc, char** argv)
   printf("a = %.2f b = %.2f n = %d\n", a, b, n);
   printf("f(x) = x * x\n");
   printf("Area under curve = %f\n", num_int);
+
+  num_int = g_trap_integration(a, b, n, &function);
+  printf("GPU Area under curve = %f\n", num_int);
+
+  printf("---------------------------------\n");
+
+  unsigned int size = 100;
+  float arr[size];
+  float sum = 0;
+  for (int i = 0; i < size; i++)
+    arr[i] = i;
+  for (int i = 0; i < size; i++)
+    sum += arr[i];
+  printf("sum: %f\n", sum);
+  float ans = g_sum(arr, size);
+  printf("%f\n", ans);
 }
