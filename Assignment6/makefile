@@ -1,11 +1,11 @@
-CC=gcc
-LFLAGS=-lOpenCL
+CC=nvcc
 CFLAGS=-g
+LFLAGS=
 
 all: mc
 
 mc: main.o
 	$(CC) $+ -o $@ $(LFLAGS)
 
-main.o: main.c
-	$(CC) -c $(CFLAGS) $<
+main.o: main.cu
+	$(CC) $(CFLAGS) -c $< 
