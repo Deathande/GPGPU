@@ -1,9 +1,10 @@
 #include <cuda.h>
-#include <curand_kernel.h>
+//#include <curand_kernel.h>
 #include <stdio.h>
 
 #define BLOCK_SIZE 1024
 
+/*
 __global__
 void mc_alg(float a, float b, float height, float (*f)(float), unsigned int* num)
 {
@@ -14,6 +15,14 @@ void mc_alg(float a, float b, float height, float (*f)(float), unsigned int* num
   if (f(x) >= y)
     atomicAdd(num, 1);
 }
+*/
+
+__global__ void test(int* arr)
+{
+  int i = threadIdx.x;
+  printf("%d\n", i);
+  arr[i] = i;
+}
 
 float function(float x)
 {
@@ -22,27 +31,15 @@ float function(float x)
 
 int main()
 {
-  float h_a = 0;
-  float h_b = 10;
-  float h_h = 10;
-  //float d_a;
-  //float d_b;
-  //float d_h;
-  float ans;
-  unsigned int* num;
-  unsigned int h_n = 0;
+  int* h_a;
+  int* d_a;
+  unsigned int n = 5;
 
-  cudaMalloc((void**) &num, sizeof(unsigned int));
-  cudaMemcpy(&h_n, num, sizeof(unsigned int), cudaMemcpyHostToDevice);
-
-  dim3 dimBlock(BLOCK_SIZE, 1, 1);
-  dim3 dimGrid(ceil((float)10 / (float)dimBlock.x), 1, 1);
-
-  mc_alg<<<dimGrid,dimBlock>>>(h_a, h_b, h_h, &function, num);
-
-  // can't get this to return anything...
-  cudaMemcpy(num, &h_n, sizeof(unsigned int), cudaMemcpyDeviceToHost);
-  ans = h_n / (dimGrid.x * BLOCK_SIZE);
-  printf("%f\n", ans);
-  cudaFree(num);
+  h_a = (int*)malloc(sizeof(int) * n);
+  cudaMalloc((void**)&d_a, sizeof(int) * n);
+  test<<<1, n>>>(d_a);
+  cudaMemcpy(h_a, d_a, n * sizeof(int), cudaMemcpyHostToDevice);
+  for (int i = 0; i < n; i++)
+    printf("%d\n", h_a[i]);
+  cudaFree(d_a);
 }
