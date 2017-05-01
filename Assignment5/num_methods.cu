@@ -47,6 +47,7 @@ float g_trap_integration(float a, float b, unsigned int n, float(*f)(float))
 __global__
 void g_sum_kernal(float* in, float* out, unsigned int size)
 {
+/*
     __shared__ float in_s[2*BLOCK_SIZE];
     int idx = 2 * blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -60,6 +61,10 @@ void g_sum_kernal(float* in, float* out, unsigned int size)
     }
     if (threadIdx.x == 0)
       out[blockIdx.x] = in_s[0];
+*/
+
+  __shared__ float in_s[BLOCK_SIZE];
+
 }
 
 __global__
