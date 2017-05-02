@@ -9,3 +9,6 @@ mc: main.o
 
 main.o: main.cu
 	$(CC) $(CFLAGS) -c $< 
+
+clean:
+	rm -f *.o mc

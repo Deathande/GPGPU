@@ -1,30 +1,38 @@
 #include <cuda.h>
-//#include <curand_kernel.h>
+#include <curand.h>
+#include <curand_kernel.h>
+#include <time.h>
 #include <stdio.h>
 
 #define BLOCK_SIZE 1024
 
-/*
-__global__
-void mc_alg(float a, float b, float height, float (*f)(float), unsigned int* num)
+__global__ void init(unsigned int seed, curandState_t* states)
 {
-  curandState* state;
-  float x = (float)curand(state) / (float)RAND_MAX / (b-a) + a;
-  float y = (float)curand(state) / (float)RAND_MAX / (height-0) + 0;
-  printf("here");
-  if (f(x) >= y)
-    atomicAdd(num, 1);
-}
-*/
-
-__global__ void test(int* arr)
-{
-  int i = threadIdx.x;
-  printf("%d\n", i);
-  arr[i] = i;
+  int id = blockIdx.x * blockDim.x + threadIdx.x;
+  curand_init(seed, blockIdx.x, 0, &states[id]);
 }
 
-float function(float x)
+__global__ void test(int* ret,
+                     curandState_t* states,
+                     float a,
+                     float b,
+                     float h,
+                     float (*f)(float))
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  float x = curand_uniform(&states[i]) * (b-a) + a;
+  float y = curand_uniform(&states[i]) * (h-0) + 0;
+  //printf("ID: %d f(x): %f y: %f\n", i, f(x), y);
+
+  printf("ID: %d x: %f y: %f\n", i, x, y);
+  if (x * x < y)
+  {
+    atomicAdd(ret, 1);
+    printf("%d\n", *ret);
+  }
+}
+
+__device__ float function(float x)
 {
   return x * x;
 }
@@ -33,13 +41,23 @@ int main()
 {
   int* h_a;
   int* d_a;
-  unsigned int n = 5;
+  float a = 1.0;
+  float b = 10.0;
+  float h = 13.0;
+  
+  curandState_t* states;
+  unsigned int n = BLOCK_SIZE;
 
-  h_a = (int*)malloc(sizeof(int) * n);
-  cudaMalloc((void**)&d_a, sizeof(int) * n);
-  test<<<1, n>>>(d_a);
-  cudaMemcpy(h_a, d_a, n * sizeof(int), cudaMemcpyHostToDevice);
-  for (int i = 0; i < n; i++)
-    printf("%d\n", h_a[i]);
+  h_a = (int*)malloc(sizeof(int));
+  *h_a = 0;
+  cudaMalloc((void**)&d_a, sizeof(int));
+  cudaMalloc((void**)&states, n * sizeof(curandState_t));
+  cudaMemcpy(d_a, h_a, sizeof(int), cudaMemcpyHostToDevice);
+  init<<<BLOCK_SIZE, 1>>>((unsigned int) time(NULL), states);
+  test<<<BLOCK_SIZE, 1>>>(d_a, states, a, b, h, &function);
+  cudaMemcpy(h_a, d_a, sizeof(int), cudaMemcpyDeviceToHost);
+  printf("return: %d\n", *h_a);
+  float result = (b - a) * h * ((float)*h_a / (float)n);
+  printf("answer: %f\n", result);
   cudaFree(d_a);
 }
