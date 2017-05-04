@@ -39,6 +39,7 @@ int main()
   float b = 10.0;
   float h = 150.0;
   unsigned int grid = 1000;
+  cudaError_t err;
   
   curandState_t* states;
   unsigned int n = BLOCK_SIZE * grid;
@@ -55,7 +56,20 @@ int main()
   dim3 dimGrid(grid, 1, 1);
 
   init<<<dimGrid, dimBlock>>>((unsigned int) time(NULL), states);
+
+  err = cudaThreadSynchronize();
+  if (err != cudaSuccess)
+  {
+    fprintf(stderr, "init : %s\n", cudaGetErrorString(err));
+    exit(-1);
+  }
   mc<<<dimGrid, dimBlock>>>(d_a, states, a, b, h, &function);
+  err = cudaThreadSynchronize();
+  if (err != cudaSuccess)
+  {
+    fprintf(stderr, "mc : %s\n", cudaGetErrorString(err));
+    exit(-1);
+  }
 
   cudaMemcpy(h_a, d_a, sizeof(int), cudaMemcpyDeviceToHost);
 
